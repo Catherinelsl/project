@@ -1,0 +1,11 @@
+# 编译输出目录（千万不要传，几百MB）
+build/
+
+# 密钥文件（非常敏感，绝对不要传到网上！）
+keyPair/
+*.pem
+
+# Conan 和本地环境缓存
+CMakeUserPresets.json
+.vs/
+.vscode/

@@ -1,0 +1,8 @@
+[requires]
+paho-mqtt-cpp/1.4.1
+nlohmann_json/3.11.3
+openssl/3.3.2
+
+[generators]
+CMakeToolchain
+CMakeDeps
