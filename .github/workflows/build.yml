@@ -39,6 +39,8 @@ jobs:
 
     # 使用NanoMQ作为Broker
     - name: Run Contract Tests
+      env:
+        PYTHONIOENCODING: utf-8
       shell: powershell
       run: |
         Invoke-WebRequest -Uri "https://www.emqx.com/en/downloads/nanomq/0.18.2/nanomq-0.18.2-windows-x86_64.zip" -OutFile "nanomq.zip"
