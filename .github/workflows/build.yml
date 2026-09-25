@@ -38,30 +38,36 @@ jobs:
         pip install -r requirements.txt
 
     # 使用NanoMQ作为Broker
-    - name: Install and Start NanoMQ
+    - name: Run Contract Tests
       shell: powershell
       run: |
         Invoke-WebRequest -Uri "https://www.emqx.com/en/downloads/nanomq/0.18.2/nanomq-0.18.2-windows-x86_64.zip" -OutFile "nanomq.zip"
         Expand-Archive -Path "nanomq.zip" -DestinationPath "nanomq" -Force
         $exePath = (Get-ChildItem -Path "nanomq" -Recurse -Filter "nanomq.exe" | Select-Object -First 1).FullName
         Start-Process -FilePath $exePath -ArgumentList "start" -NoNewWindow
-        Start-Sleep -Seconds 5
-        $portCheck = netstat -ano | findstr 1883
-        if ($portCheck) {
-            Write-Host "✅ NanoMQ 已成功启动，1883 端口正在监听！"
-        } else {
+        
+        $maxRetries = 10
+        $retryCount = 0
+        $brokerReady = $false
+        while (-not $brokerReady -and $retryCount -lt $maxRetries) {
+            Start-Sleep -Seconds 2
+            $portCheck = netstat -ano | findstr 1883
+            if ($portCheck) {
+                $brokerReady = $true
+                Write-Host "✅ NanoMQ 已成功启动，1883 端口正在监听！"
+            } else {
+                $retryCount++
+                Write-Host "等待 NanoMQ 启动... 第 $retryCount 次重试"
+            }
+        }
+        if (-not $brokerReady) {
             Write-Error "❌ NanoMQ 启动失败，1883 端口未监听！"
             exit 1
         }
-
-    - name: Start Service Executable in Background
-      run: |
-        Start-Process -FilePath "build/bin/service.exe" -NoNewWindow -RedirectStandardOutput "service_log.txt" -RedirectStandardError "service_err.txt"
+        
+        Start-Process -FilePath "build\bin\service.exe" -NoNewWindow
         Start-Sleep -Seconds 5
-
-    - name: Run Contract Tests
-      # 运行契约测试
-      run: |
+        
         pytest test_contract.py -v -s --tb=short
 
     - name: Upload Executable
