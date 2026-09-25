@@ -19,7 +19,14 @@ jobs:
 
     - name: Configure Conan Profile
       run: conan profile detect --force
-
+      
+    - name: Generate Key Pair for CI
+      shell: bash # 强制使用 bash 以便在 Windows 上用 mkdir -p 和 openssl 命令
+      run: |
+        mkdir -p keyPair
+        openssl genpkey -algorithm RSA -out keyPair/private.pem -pkeyopt rsa_keygen_bits:2048
+        openssl rsa -pubout -in keyPair/private.pem -out keyPair/public.pem
+    
     # 使用默认的官方 Conan Center
     - name: Build Project
       run: |
