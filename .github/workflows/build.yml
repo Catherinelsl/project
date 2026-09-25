@@ -33,6 +33,27 @@ jobs:
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
         cmake --build build --config Debug
 
+    - name: Install Python Test Dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Start MQTT Broker (EMQX via Docker)
+      # 使用 GitHub Actions 默认自带的 Docker 启动一个支持 MQTT v5 的 Broker
+      run: |
+        docker run -d --name emqx -p 1883:1883 -p 18083:18083 emqx/emqx:latest
+
+    - name: Start Service Executable in Background
+      # 在后台启动编译好的 service.exe
+      run: |
+        Start-Process -FilePath "build/bin/service.exe" -NoNewWindow -RedirectStandardOutput "service_log.txt" -RedirectStandardError "service_err.txt"
+        # 等待 5 秒让程序连接上 Broker
+        Start-Sleep -Seconds 5
+
+    - name: Run Contract Tests
+      # 运行契约测试
+      run: |
+        pytest test_contract.py -v -s --tb=short
+
     - name: Upload Executable
       uses: actions/upload-artifact@v4
       with:
