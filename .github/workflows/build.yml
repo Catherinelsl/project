@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: windows-latest # 选择 Windows，因为你的项目依赖 MSVC
+    runs-on: windows-2022 # 选择 Windows
 
     steps:
     - uses: actions/checkout@v4
