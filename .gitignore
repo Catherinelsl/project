@@ -9,3 +9,5 @@ keyPair/
 CMakeUserPresets.json
 .vs/
 .vscode/
+
+__pycache__/
