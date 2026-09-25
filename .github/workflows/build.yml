@@ -39,12 +39,20 @@ jobs:
 
     # 使用NanoMQ作为Broker
     - name: Install and Start NanoMQ
-      shell: bash
+      shell: powershell
       run: |
-        curl -L -o nanomq.zip https://www.emqx.com/en/downloads/nanomq/0.18.2/nanomq-0.18.2-windows-x86_64.zip
-        unzip -o nanomq.zip
-        ./nanomq-0.18.2-windows-x86_64/bin/nanomq.exe start &
-        sleep 5
+        Invoke-WebRequest -Uri "https://www.emqx.com/en/downloads/nanomq/0.18.2/nanomq-0.18.2-windows-x86_64.zip" -OutFile "nanomq.zip"
+        Expand-Archive -Path "nanomq.zip" -DestinationPath "nanomq" -Force
+        $exePath = (Get-ChildItem -Path "nanomq" -Recurse -Filter "nanomq.exe" | Select-Object -First 1).FullName
+        Start-Process -FilePath $exePath -ArgumentList "start" -NoNewWindow
+        Start-Sleep -Seconds 5
+        $portCheck = netstat -ano | findstr 1883
+        if ($portCheck) {
+            Write-Host "✅ NanoMQ 已成功启动，1883 端口正在监听！"
+        } else {
+            Write-Error "❌ NanoMQ 启动失败，1883 端口未监听！"
+            exit 1
+        }
 
     - name: Start Service Executable in Background
       run: |
