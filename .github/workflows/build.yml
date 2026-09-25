@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: windows-latest # 必须选择 Windows，因为你的项目依赖 MSVC
+    runs-on: windows-latest # 选择 Windows，因为你的项目依赖 MSVC
 
     steps:
     - uses: actions/checkout@v4
@@ -12,7 +12,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.13' # 已修改为与你本地一致的 3.13 版本
+        python-version: '3.13' # 与本地一致
 
     - name: Install Conan
       run: pip install conan
@@ -20,7 +20,7 @@ jobs:
     - name: Configure Conan Profile
       run: conan profile detect --force
 
-    # 删除了换源步骤，直接使用默认的官方 Conan Center
+    # 使用默认的官方 Conan Center
     - name: Build Project
       run: |
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
